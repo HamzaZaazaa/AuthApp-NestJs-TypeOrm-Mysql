@@ -1,5 +1,5 @@
 import { IsStrongPassword } from "class-validator";
-import { IsDate, IsEmail, IsNotEmpty, IsString, MaxLength } from "class-validator/types/decorator/decorators";
+import { IsEmail, IsNotEmpty, IsString, MaxLength } from "class-validator";
 
 
 export class userDto {
@@ -7,23 +7,21 @@ export class userDto {
     @IsString()
     @MaxLength(30)
     @IsNotEmpty()
-    name: String;
+    Name: string;
 
     @IsString()
     @MaxLength(30)
     @IsNotEmpty()
-    lastName: String;
+    lastName: string;
 
-    @IsDate()
-    @MaxLength(8)
     @IsNotEmpty()
     birthdate: Date
 
     @IsEmail()
     @IsNotEmpty()
-    email: String
+    email: string
 
-    @IsStrongPassword({ minLength: 10, minUppercase: 1, minNumbers: 1, minSymbols: 1 })
+    // @IsStrongPassword({ minLength: 10, minUppercase: 1, minNumbers: 1, minSymbols: 1 })
     @IsNotEmpty()
-    password: String
+    password: string
 }
