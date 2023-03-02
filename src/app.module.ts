@@ -4,6 +4,7 @@ import { AuthModule } from './api/auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { userEntity } from "./shared/entities/user.entity"
+import { MailingModule } from './api/mailing/mailing.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -18,7 +19,8 @@ import { userEntity } from "./shared/entities/user.entity"
       ],
       // synchronize: true,
     }),
-    AuthModule
+    AuthModule,
+    MailingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

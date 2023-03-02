@@ -1,16 +1,20 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { loginDto } from 'src/shared/dto/login.dto';
 import { userEntity } from 'src/shared/entities/user.entity';
 import { Repository } from 'typeorm';
 import { userDto } from "../../shared/dto/user.dto"
 import * as bcrypt from 'bcrypt';
+import { MailingService } from '../mailing/mailing.service';
 import { resetPasswordDto } from 'src/shared/dto/resetPassword.dto';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(userEntity)
     private userRepo: Repository<userEntity>,
+    private mailingService: MailingService,
+    private jwtService: JwtService
   ) { }
 
 
@@ -35,55 +39,28 @@ export class AuthService {
   }
 
   // RESERT USER PASSWORD
-  async resetPassword(userId, password): Promise<userEntity> {
-    const user = await this.userRepo.findOne({ where: { id: userId } })
-    console.log(user, 'USER');
-    const newPass = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-    console.log(newPass, 'NEW PASSWORD');
-    user.password = newPass
-    const passUpdated = this.userRepo.save(user)
-    return passUpdated
+  async resetPassword(emailDto: resetPasswordDto) {
+    const user = await this.userRepo.findOne({ where: { email: emailDto.email } })
+    const tokenObj = {
+      Name: user.Name,
+      email: user.email,
+      exp: user.passwordTokenExpiration
+    }
+    const token = this.jwtService.sign(tokenObj)
+    const mailObject = {
+      to: user.email,
+      from: "hamza.zaazaa@nest.com",
+      subject: "Reset Password Request",
+    }
+    const date = new Date(); date.setDate(date.getDate() + 1)
+    user.passwordTokenExpiration = date
+    user.passwordToken = token
+    this.userRepo.save(user)
+    this.mailingService.resetPassEmail(mailObject, token).catch((err) => {
+      console.log(err)
+    })
+    return new HttpException("", HttpStatus.ACCEPTED)
   }
-
-  // FIND ALL USERS
-
-  // async findAllUsers(): Promise<userEntity[]> {
-  //   return await this.userRepo.find();
-  // }
-
-  // FIND USER BY ID 
-
-  // async findOneUser(userId: number): Promise<userEntity> {
-  //   try {
-  //     return await this.userRepo.findOne({ where: { id: userId } });
-  //   } catch (error) {
-  //     console.log(error)
-  //     throw new BadRequestException
-  //   }
-  // }
-
-  // UPDATE USER BY ID
-
-  // async updateUser(userId: number, userDto) {
-  //   const findUser = await this.userRepo.findOne({ where: { id: userId } })
-  //   findUser.Name = userDto.Name
-  //   findUser.lastName = userDto.lastName
-  //   findUser.birthdate = userDto.birthdate
-  //   findUser.email = userDto.email
-  //   findUser.password = userDto.password
-  //   return this.userRepo.save(findUser)
-  // }
-
-
-  // DELETE USER BY ID
-
-  // async remove(id: string) {
-  //   try {
-  //     return await this.userRepo.delete(id)
-  //   } catch (error) {
-  //     throw new BadRequestException
-  //   }
-  // }
 
 
   // COMPARE LOGIN PASSWORD

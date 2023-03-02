@@ -22,6 +22,13 @@ export class userEntity {
     @Column()
     password: string
 
+    @Column()
+    passwordToken: string
+
+    @Column()
+    passwordTokenExpiration: Date
+
+
     @CreateDateColumn({
         type: 'timestamp',
         default: () => 'CURRENT_TIMESTAMP(6)'
