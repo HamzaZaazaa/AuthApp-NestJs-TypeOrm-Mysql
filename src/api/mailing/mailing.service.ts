@@ -30,4 +30,18 @@ export class MailingService {
             }
         })
     }
+
+    async activateAccount(mail) {
+        const url = `http://localhost:3000/auth/${mail.to}/activate-account`
+        return await this.mailerService.sendMail({
+            to: mail.to,
+            from: mail.from,
+            subject: mail.subject,
+            template: (__dirname + "/views/activateAccount").replace("\\dist", "/src"),
+            context: {
+                user: mail.to,
+                url
+            }
+        })
+    }
 }

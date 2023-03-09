@@ -5,6 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { userEntity } from "./shared/entities/user.entity"
 import { MailingModule } from './api/mailing/mailing.module';
+import { postEntity } from './shared/entities/post.entity';
+import { PostsModule } from './api/posts/posts.module';
+import { FileUploadModule } from './api/file-upload/file-upload.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -16,11 +19,14 @@ import { MailingModule } from './api/mailing/mailing.module';
       database: 'nestApp',
       entities: [
         userEntity,
+        postEntity
       ],
       // synchronize: true,
     }),
     AuthModule,
     MailingModule,
+    PostsModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

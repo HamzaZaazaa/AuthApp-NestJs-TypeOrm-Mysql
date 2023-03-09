@@ -6,8 +6,9 @@ import { Repository } from 'typeorm';
 import { userDto } from "../../shared/dto/user.dto"
 import * as bcrypt from 'bcrypt';
 import { MailingService } from '../mailing/mailing.service';
-import { resetPasswordDto } from 'src/shared/dto/resetPassword.dto';
+import { forgetPasswordDto } from 'src/shared/dto/forgetPassword.dto';
 import { JwtService } from '@nestjs/jwt';
+import { passwordResetDto } from 'src/shared/dto/passwordReset.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,10 +19,16 @@ export class AuthService {
   ) { }
 
 
-  // CREATE USER
+  // REGISTER
   async createUser(user: userDto): Promise<userEntity> {
     try {
       const addUser = this.userRepo.create(user)
+      const mailObject = {
+        to: addUser.email,
+        from: "hamza.zaazaa01@hotmail.com",
+        subject: "Account Activation Request",
+      }
+      this.mailingService.activateAccount(mailObject)
       return await this.userRepo.save(addUser)
     } catch (err) {
       console.log(err)
@@ -38,18 +45,20 @@ export class AuthService {
     })
   }
 
-  // RESERT USER PASSWORD
-  async resetPassword(emailDto: resetPasswordDto) {
-    const user = await this.userRepo.findOne({ where: { email: emailDto.email } })
+  // RESERT USER PASSWORD EMAIL
+  async forgotPasswordEmail(passwordEmailDto: forgetPasswordDto): Promise<HttpException> {
+    const user = await this.userRepo.findOne({ where: { email: passwordEmailDto.email } })
+    if (!user) {
+      throw new BadRequestException
+    }
     const tokenObj = {
       Name: user.Name,
       email: user.email,
-      exp: user.passwordTokenExpiration
     }
     const token = this.jwtService.sign(tokenObj)
     const mailObject = {
       to: user.email,
-      from: "hamza.zaazaa@nest.com",
+      from: "hamza.zaazaa01@hotmail.com",
       subject: "Reset Password Request",
     }
     const date = new Date(); date.setDate(date.getDate() + 1)
@@ -59,9 +68,36 @@ export class AuthService {
     this.mailingService.resetPassEmail(mailObject, token).catch((err) => {
       console.log(err)
     })
-    return new HttpException("", HttpStatus.ACCEPTED)
+    return new HttpException("Check your mail", HttpStatus.OK)
   }
 
+  // Update Password
+  async updatePassword(mypasswordToken, passwordDto: passwordResetDto): Promise<HttpException> {
+    const user = await this.userRepo.findOne({ where: { passwordToken: mypasswordToken } })
+    if (!user) {
+      throw new BadRequestException
+    };
+    const date = new Date(Date.now())
+    if (date > user.passwordTokenExpiration) {
+      throw new BadRequestException
+    }
+    user.password = passwordDto.password
+    user.passwordToken = null
+    user.passwordTokenExpiration = null
+    this.userRepo.save(user)
+    return new HttpException("Password updated", HttpStatus.OK)
+  }
+
+  // ACCOUNT ACTIVATION
+  async activateAccount(userMail): Promise<userEntity> {
+    const user = await this.userRepo.findOne({ where: { email: userMail } })
+    if (!user) {
+      throw new BadRequestException
+    }
+    user.iSActivate = !user.iSActivate
+    const ActiveUser = await this.userRepo.save(user)
+    return ActiveUser
+  }
 
   // COMPARE LOGIN PASSWORD
   public comparePassword(passOne, passTwo) {
