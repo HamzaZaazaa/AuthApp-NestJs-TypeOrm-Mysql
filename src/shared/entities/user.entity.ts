@@ -1,5 +1,6 @@
-import { BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
+import { postEntity } from "./post.entity";
 
 
 @Entity()
@@ -22,11 +23,14 @@ export class userEntity {
     @Column()
     password: string
 
-    @Column()
+    @Column({ nullable: true })
     passwordToken: string
 
-    @Column()
+    @Column({ nullable: true })
     passwordTokenExpiration: Date
+
+    @Column({ default: false })
+    iSActivate: boolean
 
 
     @CreateDateColumn({
@@ -47,4 +51,8 @@ export class userEntity {
     async generatePasswordHash(): Promise<any> {
         this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(10))
     }
+
+    @OneToMany(() => postEntity, (post) => post.user, { eager: true })
+    post: postEntity[]
+
 }
