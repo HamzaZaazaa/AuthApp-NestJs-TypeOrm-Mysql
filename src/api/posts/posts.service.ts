@@ -16,13 +16,14 @@ export class PostsService {
     ) { }
 
     // Create Post
-    async createPost(postDto: postDto, userId: number): Promise<postEntity> {
-        const userFounded = await this.userRepo.findOne({ where: { id: userId } })
-        if (!userFounded) {
+    async createPost(postDto: postDto, file, userId: number): Promise<postEntity> {
+        const userFound = await this.userRepo.findOne({ where: { id: userId } })
+        if (!userFound) {
             throw BadRequestException
         }
+        postDto.poster = file
         const newPost = {
-            user: userFounded,
+            user: userFound,
             ...postDto
         }
         return this.postRepo.save(newPost)

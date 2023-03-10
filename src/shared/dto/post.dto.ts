@@ -1,16 +1,10 @@
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
-
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class postDto {
+  poster: string;
 
-
-    @IsString()
-    poster: string
-
-    @IsNotEmpty()
-    @IsString()
-    // @MaxLength(10)
-    posterTitle: string
-
-
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(20)
+  posterTitle: string;
 }
