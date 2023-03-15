@@ -6,11 +6,12 @@ import { postEntity } from 'src/shared/entities/post.entity';
 import { MulterModule } from '@nestjs/platform-express';
 import { userEntity } from 'src/shared/entities/user.entity';
 import { FileUploadService } from 'src/shared/config/multer.config';
+import { commentEntity } from 'src/shared/entities/comment.entity';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([postEntity, userEntity]),
+    TypeOrmModule.forFeature([postEntity, userEntity, commentEntity]),
     MulterModule.registerAsync({
       useClass: FileUploadService
     })

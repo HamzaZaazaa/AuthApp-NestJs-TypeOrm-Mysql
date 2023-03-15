@@ -1,9 +1,10 @@
 import { BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import { postEntity } from "./post.entity";
+import { commentEntity } from "./comment.entity";
 
 
-@Entity()
+@Entity('users')
 export class userEntity {
     @PrimaryGeneratedColumn()
     id: number
@@ -52,7 +53,10 @@ export class userEntity {
         this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(10))
     }
 
-    @OneToMany(() => postEntity, (post) => post.user, { eager: true })
-    post: postEntity[]
+    @OneToMany(() => postEntity, (post) => post.user)
+    posts: postEntity[]
+
+    @OneToMany(() => commentEntity, (comment) => comment.user)
+    comments: commentEntity[]
 
 }

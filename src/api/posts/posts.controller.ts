@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -15,30 +16,44 @@ import { PostsService } from './posts.service';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private postsService: PostsService) {}
-  // ADD POST
-  @Post(':id')
-  @UseInterceptors(FileInterceptor('file'))
+  constructor(private postsService: PostsService) { }
+
+
+  // ADD NEW POST
+  @Post(':userId')
+  @UseInterceptors(FileInterceptor('poster'))
   createPost(
-    @Param('id') userId: number,
+    @Param('userId') userId: number,
     @UploadedFile() file: Express.Multer.File,
     @Body() postDto: postDto,
   ) {
     return this.postsService.createPost(postDto, file.filename, userId);
   }
 
-  // Edit post Title
-  @Patch('editposter/:id')
+  // Edit post Title by id
+  @Patch('editposter/:posterId')
   editposterTitle(
-    @Param('id') posterId: number,
+    @Param('posterId') posterId: number,
     @Body() posterTitleDto: updatePosterTitleDto,
   ) {
     return this.postsService.editposterTitle(posterId, posterTitleDto);
   }
 
-  // Delete poster
-  @Delete('deletepost/:id')
-  deletePoster(@Param('id') posterId: number) {
+  // Delete poster by id
+  @Delete('deletepost/:posterId')
+  deletePoster(@Param('posterId') posterId: number) {
     return this.postsService.deletePoster(posterId);
+  }
+
+  // FIND POSTER BY ID
+  @Get("onepost/:posterId")
+  getPosterById(@Param('posterId') posterId: number) {
+    return this.postsService.getPosterById(posterId)
+  }
+
+  // GET ALL USER POSTERS
+  @Get('posters/:userId')
+  getuserPosters(@Param("userId") userId: number) {
+    return this.postsService.getuserPosters(userId)
   }
 }

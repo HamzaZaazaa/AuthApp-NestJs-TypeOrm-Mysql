@@ -1,8 +1,9 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { commentEntity } from "./comment.entity";
 import { userEntity } from "./user.entity";
 
 
-@Entity()
+@Entity('poster')
 export class postEntity {
     @PrimaryGeneratedColumn()
     id: number
@@ -26,7 +27,9 @@ export class postEntity {
     })
     updatedAt: Date
 
-    @ManyToOne(() => userEntity, (user) => user.post)
+    @ManyToOne(() => userEntity, (user) => user.posts, { onDelete: 'CASCADE' })
     user: userEntity
 
+    @OneToMany(() => commentEntity, (comment) => comment.post)
+    comments: commentEntity[]
 }

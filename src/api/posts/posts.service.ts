@@ -2,6 +2,7 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { postDto } from 'src/shared/dto/post.dto';
 import { updatePosterTitleDto } from 'src/shared/dto/updatePosterTitle.dto';
+import { commentEntity } from 'src/shared/entities/comment.entity';
 import { postEntity } from 'src/shared/entities/post.entity';
 import { userEntity } from 'src/shared/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -15,8 +16,8 @@ export class PostsService {
         private userRepo: Repository<userEntity>
     ) { }
 
-    // Create Post
-    async createPost(postDto: postDto, file, userId: number): Promise<postEntity> {
+    // Create new Post
+    async createPost(postDto: postDto, file: any, userId: number): Promise<postEntity> {
         const userFound = await this.userRepo.findOne({ where: { id: userId } })
         if (!userFound) {
             throw BadRequestException
@@ -29,7 +30,7 @@ export class PostsService {
         return this.postRepo.save(newPost)
     }
 
-    // Edit post Title
+    // Edit post Title by id
     async editposterTitle(posterId: number, posterTitleDto: updatePosterTitleDto): Promise<postEntity> {
         const post = await this.postRepo.findOne({ where: { id: posterId } })
         if (!post) {
@@ -39,8 +40,25 @@ export class PostsService {
         return this.postRepo.save(post)
     }
 
-    // Delete Poster
+    // Delete Poster by id
     async deletePoster(posterId: number) {
         return await this.postRepo.delete(posterId)
+    }
+
+    // Find poster by id 
+    async getPosterById(posterId: number) {
+        const poster = await this.postRepo.findOne({ where: { id: posterId } })
+        if (!poster) {
+            throw new BadRequestException
+        }
+        return poster
+    }
+
+    // GET ALL USER POSTS
+    async getuserPosters(userId: number): Promise<postEntity[]> {
+        const posters = await this.postRepo.createQueryBuilder("post")
+            .where(`post.user = ${userId}`)
+            .getMany()
+        return posters
     }
 }
