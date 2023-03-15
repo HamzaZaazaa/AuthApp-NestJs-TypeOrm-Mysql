@@ -1,7 +1,9 @@
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class postDto {
-  poster: string;
+
+
+  poster: string
 
   @IsNotEmpty()
   @IsString()
