@@ -37,12 +37,24 @@ export class AuthService {
   }
 
   // LOGIN
-  async login(loginDto: loginDto): Promise<userEntity> {
-    return this.userRepo.findOne({
-      where: {
-        email: loginDto.email
-      }
-    })
+  async login(loginDto: loginDto): Promise<string> {
+    const user = await this.userRepo.findOne({ where: { email: loginDto.email } })
+    if (!user) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST)
+    }
+    if (!await this.comparePassword(loginDto.password, user.password)) {
+      throw new HttpException('Check your fields', HttpStatus.BAD_REQUEST)
+    }
+    const createToken = {
+      id: user.id,
+      Name: user.Name,
+      lastName: user.lastName,
+      birthdate: user.birthdate,
+      email: user.email
+    }
+    const token = this.jwtService.sign(createToken)
+    return token
+
   }
 
   // RESERT USER PASSWORD EMAIL
@@ -72,7 +84,7 @@ export class AuthService {
   }
 
   // Update Password
-  async updatePassword(mypasswordToken, passwordDto: passwordResetDto): Promise<HttpException> {
+  async updatePassword(mypasswordToken: string, passwordDto: passwordResetDto): Promise<HttpException> {
     const user = await this.userRepo.findOne({ where: { passwordToken: mypasswordToken } })
     if (!user) {
       throw new BadRequestException
@@ -89,7 +101,7 @@ export class AuthService {
   }
 
   // ACCOUNT ACTIVATION
-  async activateAccount(userMail): Promise<userEntity> {
+  async activateAccount(userMail: string): Promise<userEntity> {
     const user = await this.userRepo.findOne({ where: { email: userMail } })
     if (!user) {
       throw new BadRequestException
@@ -100,7 +112,7 @@ export class AuthService {
   }
 
   // COMPARE LOGIN PASSWORD
-  public comparePassword(passOne, passTwo) {
+  public comparePassword(passOne, passTwo): Promise<boolean> {
     return bcrypt.compare(passOne, passTwo)
   }
 }

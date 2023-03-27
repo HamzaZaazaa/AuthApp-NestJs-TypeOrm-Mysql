@@ -23,27 +23,7 @@ export class AuthController {
   // LOGIN
   @Post('login')
   login(@Body() loginDto: loginDto) {
-    this.authService.login(loginDto).then((user) => {
-      if (!user) {
-        throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST)
-      }
-      if (!this.authService.comparePassword(user.password, loginDto.password)) {
-        throw new HttpException('Check your fields', HttpStatus.BAD_REQUEST)
-      }
-      const createToken = {
-        id: user.id,
-        Name: user.Name,
-        lastName: user.lastName,
-        birthdate: user.birthdate,
-        email: user.email
-      }
-      const token = this.jwtService.sign(createToken)
-      return token
-
-    }).catch((err) => {
-      console.log(err)
-      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
-    })
+    return this.authService.login(loginDto)
   }
 
   // RESET PASSWORD EMAIL

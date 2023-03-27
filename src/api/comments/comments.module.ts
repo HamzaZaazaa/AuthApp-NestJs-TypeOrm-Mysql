@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { commentEntity } from 'src/shared/entities/comment.entity';
 import { postEntity } from 'src/shared/entities/post.entity';
 import { userEntity } from 'src/shared/entities/user.entity';
+import { AuthMiddleware } from 'src/shared/guards/auth.guard';
+import { UserService } from '../user/user.service';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
 
@@ -11,6 +13,10 @@ import { CommentsService } from './comments.service';
     TypeOrmModule.forFeature([commentEntity, postEntity, userEntity])
   ],
   controllers: [CommentsController],
-  providers: [CommentsService]
+  providers: [CommentsService, UserService],
 })
-export class CommentsModule { }
+export class CommentsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('comments');
+  }
+}

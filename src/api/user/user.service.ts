@@ -1,8 +1,6 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { updateUserDto } from 'src/shared/dto/updateUser.dto';
-import { commentEntity } from 'src/shared/entities/comment.entity';
-import { postEntity } from 'src/shared/entities/post.entity';
 import { userEntity } from 'src/shared/entities/user.entity';
 import { Repository } from 'typeorm';
 
@@ -11,14 +9,10 @@ export class UserService {
     constructor(
         @InjectRepository(userEntity)
         private userRepo: Repository<userEntity>,
-        @InjectRepository(postEntity)
-        private postRepo: Repository<userEntity>,
-        @InjectRepository(commentEntity)
-        private commentRepo: Repository<commentEntity>
     ) { }
 
     // UPDATE USER
-    async updateUser(userId, updateUserDto: updateUserDto): Promise<userEntity> {
+    async updateUser(userId: number, updateUserDto: updateUserDto): Promise<userEntity> {
         const user = await this.userRepo.findOne({ where: { id: userId } })
         if (!user) {
             throw new BadRequestException

@@ -15,12 +15,7 @@ export class UserController {
         return this.userService.updateUser(userId, updateUserDto)
     }
 
-    // Get user by id 
-    @Get(":id")
-    getUserById(@Param("id") userId: number) {
-        return this.userService.getUserById(userId)
-    }
-
+    // Delete user
     @Delete("delete-user/:userid")
     deleteUser(@Param('userid') userId: number) {
         return this.userService.deleteUser(userId)
