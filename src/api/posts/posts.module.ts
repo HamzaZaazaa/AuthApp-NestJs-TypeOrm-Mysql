@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,6 +7,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { userEntity } from 'src/shared/entities/user.entity';
 import { FileUploadService } from 'src/shared/config/multer.config';
 import { commentEntity } from 'src/shared/entities/comment.entity';
+import { UserService } from '../user/user.service';
+import { AuthMiddleware } from 'src/shared/guards/auth.guard';
 
 
 @Module({
@@ -16,8 +18,12 @@ import { commentEntity } from 'src/shared/entities/comment.entity';
       useClass: FileUploadService
     })
   ],
-  providers: [PostsService],
+  providers: [PostsService, UserService],
   controllers: [PostsController]
 
 })
-export class PostsModule { }
+export class PostsModule { 
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('posts');
+  }
+}

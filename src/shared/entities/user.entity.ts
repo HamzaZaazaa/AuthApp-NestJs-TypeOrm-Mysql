@@ -2,6 +2,7 @@ import { BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, OneToMany, 
 import * as bcrypt from 'bcrypt';
 import { postEntity } from "./post.entity";
 import { commentEntity } from "./comment.entity";
+import { userRole } from "../enum/userRole.enum";
 
 
 @Entity('users')
@@ -32,6 +33,9 @@ export class userEntity {
 
     @Column({ default: false })
     iSActivate: boolean
+
+    @Column('enum', { enum: userRole, default: "USER" })
+    role: string
 
 
     @CreateDateColumn({
